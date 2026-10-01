@@ -42,7 +42,7 @@ player status, progression.
 ## Nice-to-have — not required initially
 
 Small display · sound · QR codes · save codes · multiple players · local AI ·
-Oracle integration · D12 API · local/cloud model routing
+Oracle integration · D12 API · local/cloud model routing · procedural world
 
 None of these are to be built until the must-haves are done.
 
@@ -75,6 +75,83 @@ Notes that affect code:
 - 58mm paper is roughly 32 characters per line at the default font; 384 dots
   wide for images.
 
+## Receipt types
+
+Not every receipt is a wall of prose. Each printed object has a type with its
+own layout, so the paper itself tells the player what they are holding.
+
+| Type | Carries |
+| --- | --- |
+| STORY | A scene and its choices |
+| ITEM | A collectible object, with a code |
+| QUEST | An objective |
+| MAP | An ASCII map fragment |
+| CLUE | A hint, often needed later |
+| CHARACTER | An NPC the player meets |
+| ACHIEVEMENT | A marker of progress |
+| SECRET | Hidden content |
+
+Thermal printing is black and white at 58mm. That constraint is the visual
+language, not a limitation to work around.
+
+## The physical inventory loop
+
+The idea the project is built around: in an ordinary RPG the inventory lives on
+a screen. Here it lives on the player's desk.
+
+```
+digital state -> printer -> physical object -> player keeps it
+      ^                                              |
+      |                                              v
+   digital state <- player brings it back to the machine
+```
+
+An ITEM receipt carries a code. Later the game asks whether the player has that
+item. The paper has to come back to the machine for the story to continue, so
+the loop closes through the real world.
+
+## The AI narrator contract
+
+The narrator is the last thing built (milestone 6) and the most tightly bound.
+The program sends it the current situation as structured state — location, HP,
+inventory, current quest, allowed exits, whether new items are permitted — and
+asks for one encounter.
+
+The model must answer in a fixed shape, roughly:
+
+```
+SCENE:        prose
+CHOICE_A:     text
+CHOICE_B:     text
+HP_CHANGE:    0
+ITEM_ADD:     none
+NEXT_STATE:   forest_04
+```
+
+The harness (milestone 7) checks the answer before anything is printed:
+
+- Is `NEXT_STATE` a state that actually exists?
+- Is `HP_CHANGE` inside the allowed range?
+- Does every item named in `ITEM_ADD` exist in the item table?
+- Is the receipt short enough to print? (working limit: ~400 characters)
+- Are there 2-3 choices, no more and no fewer?
+
+Pass means print. Fail means reject and regenerate. The model can never grant
+itself 999 HP, invent an item, or send the player to a room that does not exist.
+
+## World and visual direction
+
+Not swords-and-dragons fantasy. The direction is a retro-futuristic terminal:
+monospace, ASCII, barcodes, system-log typography, black on white.
+
+The premise under consideration: the player finds a machine that should not
+still be running, printing messages from somewhere unclear — leaving it open
+whether the player is playing a game inside the machine, or the machine is
+using the game to reach the player.
+
+The specific chapters, items and puzzles are still to be written.
+
+
 ## Course context
 
 PSAM 5600 B, Parsons, Fall 2026. Course repo: `mfadt/sld-fall-2026`
@@ -97,11 +174,16 @@ repo is a mirror.
 
 ## Open questions
 
-- [ ] Which buttons, and how many? Milestone 2 cannot start without them.
-- [ ] What is the adventure about? Setting, tone, length. Author writes this,
-      not the model.
+- [ ] Which buttons, and how many? 2-3 is the design target. Milestone 2 cannot
+      start without them.
+- [ ] **How does a player enter an item code with only three buttons?** The
+      concept shows the player typing `GK-194`, but there is no keyboard. Either
+      the game asks a yes/no question and trusts the player, or codes get short
+      enough to punch in on three buttons, or a scanner becomes a nice-to-have.
+      This decides how milestone 5 is built.
+- [ ] What is the adventure about, concretely? Chapters, items, puzzles. The
+      author writes this, not the model.
 - [ ] Where does the AI narrator run when it arrives? Deferred to milestone 6.
-- [ ] GitHub repository name and whether it is public.
 
 ## Decisions
 
@@ -110,3 +192,5 @@ repo is a mirror.
 | 2026-09-30 | Project is Pocket Quest | Replaces an earlier camera concept |
 | 2026-09-30 | Own repository, separate from the course repo | Course repo is the whole class's; project code does not belong in it |
 | 2026-09-30 | `AGENTS.md` holds the rules, `CLAUDE.md` points at it | One copy of the rules, so the two cannot drift apart |
+| 2026-09-30 | Repo is public, named `pocket-quest`, tagged `sldllm-f26` | The course class-showcase page only finds public repos carrying that topic |
+| 2026-09-30 | Receipt types, the physical inventory loop, the narrator contract and the retro-terminal direction adopted | From the expanded concept; recorded here so the repo, not a chat, holds them |

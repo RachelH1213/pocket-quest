@@ -1,9 +1,9 @@
 # Pocket Quest
 
-An AI-powered physical adventure game. The story arrives on printed receipts
-instead of a screen. The player makes choices with physical buttons wired to a
-Raspberry Pi 5, which holds the real game state and drives a thermal receipt
-printer.
+Pocket Quest is a Raspberry Pi-powered adventure console where the game unfolds
+through physical receipts that become stories, clues, quests and collectible
+objects. The player chooses with physical buttons; the Pi holds the game state
+and prints what comes next.
 
 Course project for PSAM 5600 B: Small Linux Devices, Large Language Models
 (Parsons, Fall 2026).
