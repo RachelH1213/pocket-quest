@@ -50,7 +50,7 @@ None of these are to be built until the must-haves are done.
 
 - [ ] 1. Raspberry Pi -> thermal printer -> print `POCKET QUEST / HELLO PLAYER`
 - [ ] 2. Physical buttons -> Raspberry Pi -> different printed outputs
-- [ ] 3. Basic branching game state, no AI
+- [x] 3. Basic branching game state, no AI — playable on a laptop with stand-in hardware
 - [ ] 4. Story and Item receipt formats
 - [ ] 5. One short complete playable adventure
 - [ ] 6. AI narrator
