@@ -166,8 +166,17 @@ PSAM 5600 B, Parsons, Fall 2026. Course repo: `mfadt/sld-fall-2026`
 | 11/11 | Expand beyond the monolithic script |
 | 12/9 | Final release and showcase |
 
-The course asks for a **single-script MVP first**, and only expands past one
-script in week 12. Structure choices should respect that.
+The syllabus dates are a guide, not a contract — the instructor does not hold
+to them strictly. Treat them as direction, not deadlines, and confirm anything
+load-bearing in class or on Canvas.
+
+**Midterm pitch, 10/7.** Three to five minutes, informal — no slide deck
+expected. The instructor opens the class project page, finds the student's
+card, and clicks through to the project repository, so **the card and this
+repository are the presentation surface**. The baseline question is "what are
+you making?". Anything runnable, photographed or recorded is a bonus, not a
+requirement. What the midterm does require is commitment: the project is
+settled from here, and only the implementation keeps moving.
 
 Canvas is authoritative for grades and announcements; the syllabus in the course
 repo is a mirror.
