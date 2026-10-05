@@ -13,11 +13,11 @@ class TerminalPrinter:
     """Stand-in printer. 'Prints' to the terminal."""
 
     def print_lines(self, lines):
+        # No border here. The receipt brings its own; this just plays the part
+        # of paper coming out, one blank line standing in for the tear.
         print()
-        print("=" * LINE_WIDTH)
         for line in lines:
             print(line)
-        print("=" * LINE_WIDTH)
         print()
 
 
@@ -39,16 +39,16 @@ class ThermalPrinter:
 
 
 class KeyboardButtons:
-    """Stand-in buttons. Press 1, 2 or 3 and Enter."""
+    """Stand-in buttons. Press A, B or C and Enter."""
 
     def wait_for_choice(self, labels):
-        for number, label in enumerate(labels, start=1):
-            print(f"  [{number}] {label}")
+        # The receipt already lists the choices, the same way the real device
+        # will. Here the three buttons are the A, B and C keys.
+        letters = "ABC"[: len(labels)]
         while True:
-            answer = input("> ").strip()
-            if answer.isdigit() and 1 <= int(answer) <= len(labels):
-                return int(answer) - 1
-            print(f"  Type a number from 1 to {len(labels)}.")
+            answer = input(f"  press {' / '.join(letters)} > ").strip().upper()
+            if answer in letters:
+                return letters.index(answer)
 
 
 class GpioButtons:

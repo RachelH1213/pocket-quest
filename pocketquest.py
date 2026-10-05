@@ -11,11 +11,16 @@ something to walk through. It is meant to be replaced.
 """
 
 import hardware
+import receipts
 
 # ---------------------------------------------------------------- the world
 
 ITEMS = {
-    "glass_key": {"name": "THE GLASS KEY", "code": "GK-194"},
+    "glass_key": {
+        "name": "THE GLASS KEY",
+        "rarity": "RARE ITEM",
+        "code": "GK-194",
+    },
 }
 
 SCENES = {
@@ -146,29 +151,13 @@ class Player:
         self.hp = STARTING_HP
         self.coins = 3
         self.inventory = []
+        self.number = "017"  # placeholder until save codes exist
 
     def has(self, item_id):
         return item_id in self.inventory
 
-    def status_lines(self):
-        return [
-            f"HP       {'* ' * self.hp}".rstrip(),
-            f"COINS    {self.coins:02d}",
-        ]
-
 
 # ---------------------------------------------------------------- the game
-
-
-def build_receipt(scene, player):
-    """Turn a scene plus the player's state into lines of paper."""
-    lines = scene["title"].split("\n")
-    lines.append("")
-    lines.extend(scene["text"])
-    if not scene.get("ending"):
-        lines.append("")
-        lines.extend(player.status_lines())
-    return lines
 
 
 def available_choices(scene, player):
@@ -188,20 +177,35 @@ def play():
     while True:
         scene = SCENES[scene_id]
 
-        if "give" in scene and not player.has(scene["give"]):
-            player.inventory.append(scene["give"])
-
         if "hp" in scene:
             player.hp = max(0, player.hp + scene["hp"])
 
-        printer.print_lines(build_receipt(scene, player))
+        picked_up = None
+        if "give" in scene and not player.has(scene["give"]):
+            player.inventory.append(scene["give"])
+            picked_up = scene["give"]
 
-        if scene.get("ending") or player.hp <= 0:
+        run_is_over = scene.get("ending") or player.hp <= 0
+        choices = [] if run_is_over else available_choices(scene, player)
+
+        if scene.get("ending"):
+            printer.print_lines(receipts.ending(scene, player))
+        else:
+            printer.print_lines(receipts.story(scene, player, choices))
+
+        # The item is a second piece of paper. That piece of paper is the object.
+        if picked_up:
+            printer.print_lines(
+                receipts.item(ITEMS[picked_up], len(player.inventory))
+            )
+
+        if run_is_over:
             if player.hp <= 0:
-                printer.print_lines(["YOU ARE OUT OF HP", "", "   GAME OVER"])
+                printer.print_lines(
+                    [receipts.rule(), receipts.centre("GAME OVER"), receipts.rule()]
+                )
             return
 
-        choices = available_choices(scene, player)
         picked = buttons.wait_for_choice([c["label"] for c in choices])
         scene_id = choices[picked]["goto"]
 

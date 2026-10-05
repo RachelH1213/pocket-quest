@@ -115,7 +115,7 @@ Early. The project documentation is written; the game is not built yet.
 - [ ] 1. Pi → printer → print `POCKET QUEST / HELLO PLAYER`
 - [ ] 2. Buttons → Pi → different printed output
 - [x] 3. Branching game state, no AI
-- [ ] 4. Story and Item receipt formats
+- [x] 4. Story and Item receipt formats
 - [ ] 5. One short complete playable adventure
 - [ ] 6. AI narrator
 - [ ] 7. Harness validating the narrator
