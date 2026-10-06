@@ -8,6 +8,15 @@ played before any hardware arrives.
 
 LINE_WIDTH = 32  # characters per line on 58mm paper
 
+# The Symcode MJ-5890K, as macOS and the Pi both see it. The endpoints are not
+# the ones python-escpos assumes: this printer takes data on 0x03, not 0x01,
+# and the only way to learn that was to read the device descriptor. Measured
+# 2026-10-06 on the actual unit.
+PRINTER_VENDOR = 0x0416
+PRINTER_PRODUCT = 0x5011
+PRINTER_IN_EP = 0x81
+PRINTER_OUT_EP = 0x03
+
 
 class TerminalPrinter:
     """Stand-in printer. 'Prints' to the terminal."""
@@ -22,20 +31,26 @@ class TerminalPrinter:
 
 
 class ThermalPrinter:
-    """The real Symcode 58mm USB printer, over ESC/POS.
-
-    Not used yet — milestone 1 wires this up and tests it.
-    """
+    """The real Symcode 58mm USB printer, over ESC/POS."""
 
     def __init__(self):
         from escpos.printer import Usb
 
-        self._device = Usb(0x0416, 0x5011)  # confirm with lsusb on the Pi
+        self._device = Usb(
+            PRINTER_VENDOR,
+            PRINTER_PRODUCT,
+            in_ep=PRINTER_IN_EP,
+            out_ep=PRINTER_OUT_EP,
+        )
 
     def print_lines(self, lines):
         for line in lines:
             self._device.text(line + "\n")
-        self._device.cut()
+        self._device.text("\n\n\n")  # clear the tear bar before cutting
+        try:
+            self._device.cut()
+        except Exception:
+            pass  # some units have no cutter; the feed above is enough
 
 
 class KeyboardButtons:
@@ -81,7 +96,17 @@ def on_a_raspberry_pi():
 
 
 def get_hardware():
-    """Hand back a (printer, buttons) pair that suits wherever this is running."""
-    if on_a_raspberry_pi():
-        return ThermalPrinter(), GpioButtons()
-    return TerminalPrinter(), KeyboardButtons()
+    """Hand back a (printer, buttons) pair that suits whatever is attached.
+
+    The printer is chosen by looking for the printer, not by looking at the
+    host: it is just as real plugged into a laptop as into the Pi, and the game
+    should use it either way. Buttons still depend on the host, because GPIO
+    pins only exist on the Pi.
+    """
+    try:
+        printer = ThermalPrinter()
+    except Exception:
+        printer = TerminalPrinter()
+
+    buttons = GpioButtons() if on_a_raspberry_pi() else KeyboardButtons()
+    return printer, buttons

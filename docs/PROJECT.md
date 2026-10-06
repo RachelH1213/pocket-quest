@@ -49,6 +49,7 @@ None of these are to be built until the must-haves are done.
 ## Milestones
 
 - [ ] 1. Raspberry Pi -> thermal printer -> print `POCKET QUEST / HELLO PLAYER`
+      *(printer half proven from a laptop 2026-10-06; the Pi has not been set up yet)*
 - [ ] 2. Physical buttons -> Raspberry Pi -> different printed outputs
 - [x] 3. Basic branching game state, no AI — playable on a laptop with stand-in hardware
 - [x] 4. Story and Item receipt formats
@@ -64,14 +65,19 @@ Milestones 1-5 contain no model calls at all.
 | Part | Detail | Status |
 | --- | --- | --- |
 | Raspberry Pi 5, 4GB | CanaKit bundle: board, case, active cooler, 45W USB-C PSU, 32GB microSD | On hand |
-| Thermal printer | Symcode 58mm USB, MJ-5890K | Ordered |
+| Thermal printer | Symcode 58mm USB, MJ-5890K | **Working** — prints from a laptop over USB, 2026-10-06 |
 | Thermal paper | MUNBYN 2 1/4" x 50ft, 10 rolls | Ordered |
 | Buttons | Not chosen yet | **Open** |
 
 Notes that affect code:
 
 - Raspberry Pi 5 cannot use `RPi.GPIO`. Buttons must use `gpiozero`.
-- The printer is USB ESC/POS, driven with `python-escpos`.
+- The printer is USB ESC/POS, driven with `python-escpos`. It enumerates as
+  `POS58 Printer USB`, vendor `0x0416`, product `0x5011` — but **its bulk OUT
+  endpoint is `0x03`, not the `0x01` python-escpos assumes**, so constructing
+  `Usb()` without `out_ep=0x03` fails with `Invalid endpoint address 0x1`. The
+  IN endpoint is `0x81`. Read off the device descriptor on 2026-10-06; the
+  values live in `hardware.py`.
 - 58mm paper is roughly 32 characters per line at the default font; 384 dots
   wide for images.
 
