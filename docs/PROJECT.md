@@ -48,8 +48,7 @@ None of these are to be built until the must-haves are done.
 
 ## Milestones
 
-- [ ] 1. Raspberry Pi -> thermal printer -> print `POCKET QUEST / HELLO PLAYER`
-      *(printer half proven from a laptop 2026-10-06; the Pi has not been set up yet)*
+- [x] 1. Raspberry Pi -> thermal printer -> print `POCKET QUEST / HELLO PLAYER`
 - [ ] 2. Physical buttons -> Raspberry Pi -> different printed outputs
 - [x] 3. Basic branching game state, no AI — playable on a laptop with stand-in hardware
 - [x] 4. Story and Item receipt formats
@@ -67,7 +66,34 @@ Milestones 1-5 contain no model calls at all.
 | Raspberry Pi 5, 4GB | CanaKit bundle: board, case, active cooler, 45W USB-C PSU, 32GB microSD | On hand |
 | Thermal printer | Symcode 58mm USB, MJ-5890K | **Working** — prints from a laptop over USB, 2026-10-06 |
 | Thermal paper | MUNBYN 2 1/4" x 50ft, 10 rolls | Ordered |
-| Buttons | Not chosen yet | **Open** |
+| Buttons | MakerSpot 6mm tactile, pre-wired with female Dupont ends | **Not ordered yet** |
+
+## Running on the Pi
+
+The Pi is set up and prints. Reaching it and running the game:
+
+```
+ssh rachel@pocketquest.local        # key-based, no password is set
+cd ~/pocket-quest && git pull
+~/pocketquest-venv/bin/python pocketquest.py
+```
+
+- Hostname `pocketquest`, user `rachel`, SSH key only, passwordless sudo.
+- Raspberry Pi OS Debian 13 (trixie), kernel 6.12, root grown to 29G.
+- Dependencies live in `~/pocketquest-venv` — Debian will not let pip install
+  into the system Python, so the venv is made with `--system-site-packages` to
+  keep gpiozero visible.
+- `/etc/udev/rules.d/99-pocketquest-printer.rules` gives the logged-in user the
+  printer, so none of this needs sudo.
+- Provisioned from cloud-init files on the boot partition (`user-data`,
+  `network-config`). Two things that cost an hour and are worth knowing:
+  installing an SSH key does **not** start the SSH server on Raspberry Pi OS —
+  it ships disabled, and either an empty `ssh` file on the boot partition or a
+  `runcmd` entry is needed. And cloud-init skips its whole first-boot config if
+  `instance_id` in `meta-data` has not changed, so re-provisioning a card means
+  changing that value too.
+- Buttons are opt-in: `POCKETQUEST_BUTTONS=gpio`. Without it the keyboard
+  stands in, because being on a Pi does not mean buttons are wired to it.
 
 Notes that affect code:
 

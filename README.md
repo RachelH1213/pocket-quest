@@ -110,9 +110,9 @@ black and white, monospace — the constraint is the visual language.
 
 ## Status
 
-Early. The project documentation is written; the game is not built yet.
+The Pi prints. A branching chapter plays end to end, on a laptop or on the Pi, with story and item receipts coming out on paper. Buttons are next.
 
-- [ ] 1. Pi → printer → print `POCKET QUEST / HELLO PLAYER`
+- [x] 1. Pi → printer → print `POCKET QUEST / HELLO PLAYER`
 - [ ] 2. Buttons → Pi → different printed output
 - [x] 3. Branching game state, no AI
 - [x] 4. Story and Item receipt formats
