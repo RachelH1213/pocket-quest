@@ -52,7 +52,7 @@ None of these are to be built until the must-haves are done.
 - [ ] 2. Physical buttons -> Raspberry Pi -> different printed outputs
 - [x] 3. Basic branching game state, no AI — playable on a laptop with stand-in hardware
 - [x] 4. Story and Item receipt formats
-- [ ] 5. One short complete playable adventure
+- [x] 5. One short complete playable adventure — Chapter 01, a draft
 - [ ] 6. AI narrator
 - [ ] 7. Harness validating structured AI output
 - [ ] 8. Only then: remote AI through Oracle or D12
@@ -222,8 +222,9 @@ repo is a mirror.
       the game asks a yes/no question and trusts the player, or codes get short
       enough to punch in on three buttons, or a scanner becomes a nice-to-have.
       This decides how milestone 5 is built.
-- [ ] What is the adventure about, concretely? Chapters, items, puzzles. The
-      author writes this, not the model.
+- [ ] Chapter 01 is drafted but not the author.s. Rewrite the prose, and decide
+      whether COINS means anything — it is printed on every receipt and never
+      changes.
 - [ ] Where does the AI narrator run when it arrives? Deferred to milestone 6.
 
 ## Decisions

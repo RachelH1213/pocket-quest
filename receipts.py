@@ -50,16 +50,19 @@ def story(scene, player, choices):
     return lines
 
 
+DEFAULT_ART = ["/\\", "/  \\", "/____\\"]
+
+
 def item(item_data, number):
     """An ITEM receipt. This piece of paper is the object."""
-    return [
+    lines = [
         rule(),
         centre(f"ITEM {number:02d}"),
         rule(),
         "",
-        centre("/\\"),
-        centre("/  \\"),
-        centre("/____\\"),
+    ]
+    lines.extend(centre(row) for row in item_data.get("art", DEFAULT_ART))
+    lines.extend([
         "",
         centre(item_data["name"]),
         centre(item_data["rarity"]),
@@ -70,7 +73,8 @@ def item(item_data, number):
         centre(item_data["code"]),
         "",
         rule(),
-    ]
+    ])
+    return lines
 
 
 def ending(scene, player):

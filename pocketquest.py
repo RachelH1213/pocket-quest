@@ -6,8 +6,9 @@ Nothing in this file knows whether it is talking to a thermal printer or a
 terminal. It asks hardware.py for a printer and some buttons and gets on with
 the game.
 
-The story below is placeholder, lifted from the concept document so there is
-something to walk through. It is meant to be replaced.
+Chapter 01 is a draft. It extends the world set out in the concept document —
+the machine that should not be running, the red light, the glass key, the glass
+door — and it is the author's to rewrite.
 """
 
 import hardware
@@ -20,6 +21,13 @@ ITEMS = {
         "name": "THE GLASS KEY",
         "rarity": "RARE ITEM",
         "code": "GK-194",
+        "art": ["/\\", "/ o \\", "/_____\\"],
+    },
+    "the_page": {
+        "name": "THE PAGE",
+        "rarity": "EVIDENCE",
+        "code": "PG-001",
+        "art": ["+-------+", "| ~~~~~ |", "| ~~~~  |", "+-------+"],
     },
 }
 
@@ -92,21 +100,103 @@ SCENES = {
         "choices": [
             {
                 "label": "USE THE GLASS KEY",
-                "goto": "ending_open",
+                "goto": "corridor_01",
                 "requires": "glass_key",
             },
             {"label": "KNOCK", "goto": "ending_knock"},
             {"label": "WALK AWAY", "goto": "ending_away"},
         ],
     },
-    "ending_open": {
-        "title": "THE DOOR OPENS",
+    "corridor_01": {
+        "title": "BEHIND THE DOOR",
         "text": [
-            "The key fits the opening",
-            "exactly, as though the door",
-            "had been waiting for it.",
+            "A corridor of machines,",
+            "all of them printing.",
             "",
-            "Behind it, the signal.",
+            "The nearest one stops",
+            "as you reach it.",
+            "",
+            "A page hangs from it,",
+            "still warm.",
+        ],
+        "choices": [
+            {"label": "READ THE PAGE", "goto": "page_01"},
+            {"label": "WALK PAST", "goto": "room_01"},
+        ],
+    },
+    "page_01": {
+        "title": "THE PAGE",
+        "text": [
+            "It describes someone waking",
+            "in a forest beside a machine.",
+            "",
+            "It describes the leaves,",
+            "the key, the door.",
+            "",
+            "It stops at the line where",
+            "you are standing.",
+        ],
+        "give": "the_page",
+        "choices": [
+            {"label": "GO ON", "goto": "room_01"},
+        ],
+    },
+    "room_01": {
+        "title": "THE SIGNAL ROOM",
+        "text": [
+            "One machine, older than",
+            "the others, still warm.",
+            "",
+            "This is where the red light",
+            "was coming from.",
+            "",
+            "It is printing your name.",
+        ],
+        "choices": [
+            {"label": "PULL THE CORD", "goto": "ending_off"},
+            {
+                "label": "FEED IT THE PAGE",
+                "goto": "ending_page",
+                "requires": "the_page",
+            },
+            {"label": "SIT DOWN AND WAIT", "goto": "ending_wait"},
+        ],
+    },
+    "ending_off": {
+        "title": "YOU PULL THE CORD",
+        "text": [
+            "The printing stops.",
+            "The forest goes quiet.",
+            "",
+            "The receipts in your hand",
+            "are still warm.",
+            "",
+            "   END OF CHAPTER 01",
+        ],
+        "ending": True,
+    },
+    "ending_page": {
+        "title": "YOU FEED IT THE PAGE",
+        "text": [
+            "The machine takes it back",
+            "and starts again from the",
+            "line where you stood.",
+            "",
+            "This time it prints what",
+            "you are going to do next.",
+            "",
+            "   END OF CHAPTER 01",
+        ],
+        "ending": True,
+    },
+    "ending_wait": {
+        "title": "YOU SIT DOWN",
+        "text": [
+            "You let it work.",
+            "",
+            "It prints until morning.",
+            "",
+            "None of it is about you.",
             "",
             "   END OF CHAPTER 01",
         ],
