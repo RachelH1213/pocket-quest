@@ -54,7 +54,7 @@ None of these are to be built until the must-haves are done.
 - [x] 4. Story and Item receipt formats
 - [x] 5. One short complete playable adventure — Chapter 01, a draft
 - [x] 6. AI narrator
-- [ ] 7. Harness validating structured AI output
+- [x] 7. Harness validating structured AI output
 - [ ] 8. Only then: remote AI through Oracle or D12
 
 Milestones 1-5 contain no model calls at all.
@@ -255,10 +255,41 @@ First run, against a prompt that spelled all of this out:
 
 Nothing here is a bug to fix in the prompt. It is the reason milestone 7 exists.
 
+## What the harness caught
+
+Twelve kinds of bad reply were fed to it by hand — an invented item, a real item
+granted where it was not allowed, a destination that does not exist, a
+destination that exists but was not offered, HP moved by five, HP that was not a
+number, a line wider than the paper, six scene lines, no scene, a missing
+choice, a choice longer than the button strip. It caught all twelve and passed
+the one good reply.
+
+Then it was pointed at the live model, three attempts:
+
+| | |
+| --- | --- |
+| attempt 1 | two lines at 34 and 35 characters against a 32 character paper |
+| attempt 2 | both choices named game states |
+| attempt 3 | a choice named a game state |
+| accepted | none |
+
+The game fell back on the author's scene, which is what it is supposed to do,
+and the model never touched the game state. The system worked. The narrator,
+however, contributed nothing, and a narrator with a zero percent acceptance
+rate is not yet a feature. See the open question below.
+
 ## Open questions
 
 - [ ] Which buttons, and how many? 2-3 is the design target. Milestone 2 cannot
       start without them.
+- [ ] **Should the model be choosing `NEXT_STATE` at all?** It fails that field
+      more than any other, by naming the destination inside the player-facing
+      choice. The program already knows the map. Handing the model the state
+      names is handing it the chance to break a rule it did not need to be
+      given — and letting it pick the destination is letting it steer the game,
+      which the first design principle says it must not do. The alternative is
+      to ask it only for prose, and keep the routing in the program. This is an
+      architectural change and is the author's call.
 - [ ] How does the Pi reach Ollama on the node? SSH tunnel, Tailscale, or
       something else. Development uses a tunnel from the laptop.
 - [ ] **How does a player enter an item code with only three buttons?** The
