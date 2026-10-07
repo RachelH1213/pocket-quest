@@ -42,6 +42,10 @@ class ThermalPrinter:
             in_ep=PRINTER_IN_EP,
             out_ep=PRINTER_OUT_EP,
         )
+        # python-escpos opens the device lazily, on first write. Touch it here
+        # so that "no printer attached" fails while we are still choosing
+        # hardware, and not halfway through someone's game.
+        self._device.device
 
     def print_lines(self, lines):
         for line in lines:
