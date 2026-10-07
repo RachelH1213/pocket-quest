@@ -104,8 +104,13 @@ Notes that affect code:
   `Usb()` without `out_ep=0x03` fails with `Invalid endpoint address 0x1`. The
   IN endpoint is `0x81`. Read off the device descriptor on 2026-10-06; the
   values live in `hardware.py`.
-- 58mm paper is roughly 32 characters per line at the default font; 384 dots
-  wide for images.
+- 58mm paper is **32 characters** per line, measured on the unit with a printed
+  ruler on 2026-10-07, and 384 dots wide for images.
+- ESC/POS settings are sticky — they live in the printer and survive the process
+  that sent them. One run that turned on double-width left every later receipt
+  wrapping at 16 characters until the printer was reset, which looked like a
+  layout bug in the code and was not. `ThermalPrinter.print_lines` now sends
+  `INIT` before every receipt.
 
 ## Receipt types
 
