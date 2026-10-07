@@ -6,6 +6,9 @@ or the stand-ins that run on a laptop. That is what lets the game be written and
 played before any hardware arrives.
 """
 
+import os
+import time
+
 LINE_WIDTH = 32  # characters per line on 58mm paper
 
 # The Symcode MJ-5890K, as macOS and the Pi both see it. The endpoints are not
@@ -73,8 +76,8 @@ class KeyboardButtons:
 class GpioButtons:
     """The real buttons on the Pi.
 
-    Not used yet — milestone 2 wires these up. Raspberry Pi 5 needs gpiozero;
-    RPi.GPIO does not work on it.
+    Milestone 2 wires these up; nothing is soldered to these pins yet. Raspberry
+    Pi 5 needs gpiozero, because RPi.GPIO does not work on it.
     """
 
     PINS = (17, 27, 22)  # provisional, until the buttons are chosen
@@ -88,7 +91,10 @@ class GpioButtons:
         while True:
             for index, button in enumerate(self._buttons[: len(labels)]):
                 if button.is_pressed:
+                    while button.is_pressed:  # one press is one choice
+                        time.sleep(0.01)
                     return index
+            time.sleep(0.01)  # without this the loop eats a whole CPU core
 
 
 def on_a_raspberry_pi():
@@ -112,5 +118,12 @@ def get_hardware():
     except Exception:
         printer = TerminalPrinter()
 
-    buttons = GpioButtons() if on_a_raspberry_pi() else KeyboardButtons()
+    # Being on a Pi is not the same as having buttons wired to it. Until
+    # milestone 2 puts real buttons on those pins, asking gpiozero to wait for
+    # a press is a wait that never ends, so GPIO is opt-in:
+    #     POCKETQUEST_BUTTONS=gpio python3 pocketquest.py
+    if os.environ.get("POCKETQUEST_BUTTONS") == "gpio":
+        buttons = GpioButtons()
+    else:
+        buttons = KeyboardButtons()
     return printer, buttons
