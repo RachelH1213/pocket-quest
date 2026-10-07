@@ -117,7 +117,7 @@ The Pi prints. A branching chapter plays end to end, on a laptop or on the Pi, w
 - [x] 3. Branching game state, no AI
 - [x] 4. Story and Item receipt formats
 - [x] 5. One short complete playable adventure
-- [ ] 6. AI narrator
+- [x] 6. AI narrator
 - [ ] 7. Harness validating the narrator
 - [ ] 8. Only then: remote AI
 

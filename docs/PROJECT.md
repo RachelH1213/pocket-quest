@@ -53,7 +53,7 @@ None of these are to be built until the must-haves are done.
 - [x] 3. Basic branching game state, no AI — playable on a laptop with stand-in hardware
 - [x] 4. Story and Item receipt formats
 - [x] 5. One short complete playable adventure — Chapter 01, a draft
-- [ ] 6. AI narrator
+- [x] 6. AI narrator
 - [ ] 7. Harness validating structured AI output
 - [ ] 8. Only then: remote AI through Oracle or D12
 
@@ -218,10 +218,49 @@ settled from here, and only the implementation keeps moving.
 Canvas is authoritative for grades and announcements; the syllabus in the course
 repo is a mirror.
 
+## The narrator's model
+
+`qwen3.5:9b`, served by Ollama on the author's own Oracle Ampere node — which is
+also what the course asks for in week 11, so the assignment and the project are
+the same piece of work.
+
+Measured on the node, 2026-10-07:
+
+| | |
+| --- | --- |
+| Speed | 5.6 tokens/sec, CPU only — the node has no GPU |
+| One scene | 22–36 seconds |
+| `qwen3.5:0.8b` | 37 tok/s but cannot hold the format; it invented an item and ran every field onto one line |
+
+Two things that are easy to lose a morning to:
+
+- **qwen3.5 reasons by default.** Left alone it spends the whole token budget
+  thinking and returns an empty `response`. `"think": false` turns that off.
+- **Ollama listens on `127.0.0.1` only.** Nothing outside the node can reach it,
+  which is the right default. Development goes through an SSH tunnel —
+  `ssh -N -L 11435:127.0.0.1:11434 mynode` — and 11435 because the author's Mac
+  is already running an empty Ollama on 11434. How the Pi reaches the node is
+  still open.
+
+The narrator talks to Ollama's plain HTTP API through `urllib`, so there is no
+SDK to install on the Pi.
+
+## What the model actually does with the rules
+
+First run, against a prompt that spelled all of this out:
+
+- asked for at most 28 characters a line, wrote 32
+- asked for up to 4 lines, wrote 1
+- told never to name a game state in a choice, wrote `open door_01`
+
+Nothing here is a bug to fix in the prompt. It is the reason milestone 7 exists.
+
 ## Open questions
 
 - [ ] Which buttons, and how many? 2-3 is the design target. Milestone 2 cannot
       start without them.
+- [ ] How does the Pi reach Ollama on the node? SSH tunnel, Tailscale, or
+      something else. Development uses a tunnel from the laptop.
 - [ ] **How does a player enter an item code with only three buttons?** The
       concept shows the player typing `GK-194`, but there is no keyboard. Either
       the game asks a yes/no question and trusts the player, or codes get short
@@ -230,7 +269,7 @@ repo is a mirror.
 - [ ] Chapter 01 is drafted but not the author.s. Rewrite the prose, and decide
       whether COINS means anything — it is printed on every receipt and never
       changes.
-- [ ] Where does the AI narrator run when it arrives? Deferred to milestone 6.
+
 
 ## Decisions
 
