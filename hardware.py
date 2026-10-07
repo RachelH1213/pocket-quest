@@ -51,6 +51,12 @@ class ThermalPrinter:
         self._device.device
 
     def print_lines(self, lines):
+        # ESC/POS settings are sticky: they live in the printer, not in this
+        # process, and survive until something resets them. One run that turned
+        # on double-width left every later receipt wrapping at 16 characters
+        # instead of 32. Start every receipt from a known state.
+        self._device.hw("INIT")
+        self._device.set(align="left", bold=False, width=1, height=1)
         for line in lines:
             self._device.text(line + "\n")
         self._device.text("\n\n\n")  # clear the tear bar before cutting
