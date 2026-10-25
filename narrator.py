@@ -3,7 +3,14 @@
 The program owns the rules. This file hands the model a description of the
 situation and asks for one scene's worth of prose, in a shape the program can
 read back. It does not decide anything: what the model sends is parsed here and
-checked by the harness (milestone 7) before any of it touches the game.
+checked by the harness before any of it touches the game.
+
+The model is never shown the names of the game's states, and is never asked
+where the player should go next. The program knows the map and does the
+routing. Measured over five runs each, being shown the state names made the
+model write them into the player's choices eight times; not being shown them
+made that impossible, and the acceptance rate went from one in five to four in
+five at the same speed.
 
 Talks to Ollama over its plain HTTP API, so there is no SDK to install. The
 model runs on the author's own Oracle node, which is also what the course asks
@@ -19,7 +26,7 @@ ENDPOINT = os.environ.get("POCKETQUEST_OLLAMA", "http://127.0.0.1:11434")
 MODEL = os.environ.get("POCKETQUEST_MODEL", "qwen3.5:9b")
 TIMEOUT = 180  # the node is CPU-only; a scene takes about 22 seconds
 
-FIELDS = ("SCENE", "CHOICE_A", "CHOICE_B", "HP_CHANGE", "ITEM_ADD", "NEXT_STATE")
+FIELDS = ("SCENE", "CHOICE_A", "CHOICE_B", "HP_CHANGE", "ITEM_ADD")
 
 PROMPT = """\
 You write scenes for an adventure game that prints on receipt paper.
@@ -33,18 +40,16 @@ THE SITUATION
 location: {location}
 hp: {hp}
 inventory: {inventory}
-you may send the player to: {allowed_next}
 you may grant an item: {items_allowed}
 
 RULES
 - SCENE is at most 4 lines, each at most 28 characters. Count them.
 - The two choices are things the player does, written as commands, at most 20
-  characters. Never name a game state in a choice.
+  characters.
 - HP_CHANGE is exactly -1, 0 or 1.
 - ITEM_ADD is none unless granting an item is allowed above.
-- NEXT_STATE is copied exactly from the list above.
 
-Reply with these six lines and nothing else:
+Reply with these five lines and nothing else:
 SCENE:
 <line>
 <line>
@@ -52,7 +57,6 @@ CHOICE_A: <text>
 CHOICE_B: <text>
 HP_CHANGE: <number>
 ITEM_ADD: none
-NEXT_STATE: <state>
 """
 
 
@@ -61,11 +65,12 @@ class NarratorError(RuntimeError):
 
 
 def build_prompt(state):
+    """Note what is absent: the map. The model is told where the player is, not
+    where they may go."""
     return PROMPT.format(
         location=state["location"],
         hp=state["hp"],
         inventory=", ".join(state["inventory"]) or "empty",
-        allowed_next=", ".join(state["allowed_next"]),
         items_allowed=", ".join(state.get("items_allowed", [])) or "no",
     )
 
@@ -121,6 +126,12 @@ def parse(reply):
     return found
 
 
-def narrate(state):
-    """One scene, as the model wrote it. Nothing here has been checked yet."""
-    return parse(ask_model(build_prompt(state)))
+def narrate(state, next_state):
+    """One scene, as the model wrote it. Nothing here has been checked yet.
+
+    `next_state` is the program's routing decision, attached after the fact so
+    the harness can check it like any other field. The model had no part in it.
+    """
+    reply = parse(ask_model(build_prompt(state)))
+    reply["NEXT_STATE"] = next_state
+    return reply
