@@ -10,11 +10,29 @@ glyphs live in one place below — once milestone 1 proves what the Symcode can
 actually render, change them there and nothing else moves.
 """
 
+import textwrap
+
 WIDTH = 32  # characters per line on 58mm paper
 
 HEAVY = "="
 LIGHT = "-"
 HEART = "*"
+
+
+def wrap(lines):
+    """Fit lines to the paper, breaking on words.
+
+    How text meets paper is this file's job, not the narrator's. A model asked
+    to count characters gets it wrong — 33, 34, 35 against a 32 character
+    width — while a blank line the author left for spacing is kept as it is.
+    """
+    out = []
+    for line in lines:
+        if not line.strip():
+            out.append("")
+        else:
+            out.extend(textwrap.wrap(line, width=WIDTH) or [""])
+    return out
 
 
 def centre(text):
@@ -37,7 +55,7 @@ def story(scene, player, choices):
     lines = [rule(), centre("POCKET QUEST"), rule(), ""]
     lines.extend(scene["title"].split("\n"))
     lines.append("")
-    lines.extend(scene["text"])
+    lines.extend(wrap(scene["text"]))
     lines.append("")
     lines.extend(_status(player))
 
@@ -82,7 +100,7 @@ def ending(scene, player):
     lines = [rule(), centre("POCKET QUEST"), rule(), ""]
     lines.extend(scene["title"].split("\n"))
     lines.append("")
-    lines.extend(scene["text"])
+    lines.extend(wrap(scene["text"]))
     lines.extend(["", rule(LIGHT), f"PLAYER {player.number}"])
     lines.append(f"ITEMS    {len(player.inventory):02d}")
     lines.extend([rule()])

@@ -313,11 +313,36 @@ lines as WHAT IS HERE, and told not to add an object that is not in them. Five
 runs afterwards: every one about the corridor, the machines, the page and the
 key, every choice acting on something real. The invention stopped.
 
-**What it still gets wrong is typography.** Of seven rejections across those
-runs, six were line width — 33, 34, 35 characters against a paper that fits 32,
-and twice the whole scene on a single line of 75 and 141. Asking a model to
-count characters does not work, and "Count them" in the prompt does not make it
-work. The open question below is whether counting was ever its job.
+**Typesetting moved to the program, 2026-10-27.** Six of seven rejections were
+line width — 33, 34, 35 against a paper that fits 32 — and asking a model to
+count characters does not work however plainly the prompt says to. The model is
+now asked for sentences and `receipts.py` wraps them, which is where the
+question of how text meets paper already lived. The harness no longer measures
+lines; it measures how much was written, because length is a question about the
+writing and too much prose is too much however it is broken up.
+
+This is not the harness quietly repairing a reply. What it refuses to repair are
+decisions — HP, items, where a choice leads. A line break is not a decision.
+
+The choice limit was also wrong. Twenty characters was a number picked by
+feel; a choice prints as `[A] ` plus its text, so the paper allows 28. It is
+now derived rather than guessed.
+
+**Two prompt faults found by reading the output.** The model described "flat
+sentences that do not explain what they mean" as a thing present in the room —
+it was reading the house style as scenery, so the style instructions are now
+under their own heading that says they are not things that exist. And it
+offered to take the glass key the player was already holding, so the inventory
+is now labelled as already in the player's hands.
+
+**A parser that was too strict.** One reply was thrown away whole for omitting
+the `SCENE:` label above otherwise perfect prose. Anything before the first
+labelled field is now read as the scene. Reading loosely is not accepting
+loosely: every field still goes through the harness.
+
+Acceptance across these changes, same scene, same model: 1 in 5 when the model
+was shown the map, 2 in 5 once it was grounded but still typesetting, 6 in 6
+once typesetting moved to the program and the choice limit came from the paper.
 
 ## What the harness caught
 
@@ -346,13 +371,6 @@ rate is not yet a feature. See the open question below.
 
 - [ ] Which buttons, and how many? 2-3 is the design target. Milestone 2 cannot
       start without them.
-- [ ] **Should the model be writing lines at all, or sentences?** Line width is
-      now almost the whole rejection rate. The model is being asked to typeset,
-      which it is bad at, while `receipts.py` already owns how text meets the
-      paper. Asking for prose and wrapping it in the program would move the job
-      to the side that can do it. The harness refuses to repair a model's
-      decisions, but wrapping is presentation rather than a decision — the
-      author should say whether that line holds.
 - [ ] How does the Pi reach Ollama on the node? SSH tunnel, Tailscale, or
       something else. Development uses a tunnel from the laptop.
 - [ ] **How does a player enter an item code with only three buttons?** The

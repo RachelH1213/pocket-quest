@@ -9,9 +9,12 @@ The checks are not hypothetical. The first real reply from the narrator broke
 three of them, against a prompt that had spelled all three out.
 """
 
-MAX_LINE = 32  # the paper is 32 characters wide; longer wraps and breaks words
-MAX_SCENE_LINES = 4
-MAX_CHOICE = 20
+import receipts
+
+MAX_SCENE_CHARS = 160  # five lines of paper, once the program has wrapped it
+MAX_SCENE_LINES = 5  # counted after wrapping, not as the model typed it
+# A choice prints as "[A] " plus its text, so the paper decides this, not taste.
+MAX_CHOICE = receipts.WIDTH - len("[A] ")
 MAX_RECEIPT = 400  # characters, so one scene stays one receipt
 HP_LIMIT = 1  # the model may move HP by one, in either direction
 
@@ -27,11 +30,15 @@ def check(reply, state, known_states, known_items):
     scene = reply.get("SCENE") or []
     if not scene:
         problems.append("the scene is empty")
-    if len(scene) > MAX_SCENE_LINES:
-        problems.append(f"the scene is {len(scene)} lines, the limit is {MAX_SCENE_LINES}")
-    for line in scene:
-        if len(line) > MAX_LINE:
-            problems.append(f"a line is {len(line)} characters, the paper fits {MAX_LINE}: {line!r}")
+    # Line breaks are the program's job — receipts.py wraps to the paper. What
+    # is checked here is length, which is a question about the writing and not
+    # about typesetting: too much prose is too much however it is broken up.
+    written = sum(len(line) for line in scene)
+    if written > MAX_SCENE_CHARS:
+        problems.append(f"the scene is {written} characters, the limit is {MAX_SCENE_CHARS}")
+    wrapped = receipts.wrap(scene)
+    if len(wrapped) > MAX_SCENE_LINES:
+        problems.append(f"the scene fills {len(wrapped)} lines of paper, the limit is {MAX_SCENE_LINES}")
 
     for field in ("CHOICE_A", "CHOICE_B"):
         choice = reply.get(field, "")
@@ -66,7 +73,7 @@ def check(reply, state, known_states, known_items):
         if nxt not in state["allowed_next"]:
             problems.append(f"NEXT_STATE is {nxt!r}, which is not one of {state['allowed_next']}")
 
-    length = sum(len(line) + 1 for line in scene) + len(reply.get("CHOICE_A", "")) + len(reply.get("CHOICE_B", ""))
+    length = sum(len(line) + 1 for line in wrapped) + len(reply.get("CHOICE_A", "")) + len(reply.get("CHOICE_B", ""))
     if length > MAX_RECEIPT:
         problems.append(f"the receipt would be {length} characters, the limit is {MAX_RECEIPT}")
 
