@@ -51,6 +51,18 @@ SCENES = {
         ],
         "choices": [
             {"label": "FOLLOW THE LIGHT", "goto": "door_01"},
+            {"label": "STAY A MOMENT", "goto": "forest_02"},
+        ],
+    },
+    "forest_02": {
+        "title": "YOU DO NOT MOVE",
+        "text": [
+            "The light keeps blinking.",
+            "",
+            "The machine beside you",
+            "is still warm.",
+        ],
+        "choices": [
             {"label": "SEARCH THE AREA", "goto": "clearing_01"},
             {"label": "CALL FOR HELP", "goto": "silence_01"},
         ],
@@ -111,7 +123,7 @@ SCENES = {
                 "goto": "corridor_01",
                 "requires": "glass_key",
             },
-            {"label": "KNOCK", "goto": "ending_knock"},
+            {"label": "KNOCK", "goto": "ending_knock", "unless": "glass_key"},
             {"label": "WALK AWAY", "goto": "ending_away"},
         ],
     },
@@ -162,7 +174,7 @@ SCENES = {
             "It is printing your name.",
         ],
         "choices": [
-            {"label": "PULL THE CORD", "goto": "ending_off"},
+            {"label": "PULL THE CORD", "goto": "ending_off", "unless": "the_page"},
             {
                 "label": "FEED IT THE PAGE",
                 "goto": "ending_page",
@@ -302,11 +314,17 @@ def tell(scene, player, choices, note):
 
 
 def available_choices(scene, player):
-    """Choices the player can actually take right now."""
+    """Choices the player can actually take right now.
+
+    `requires` shows a choice only to a player holding something. `unless`
+    hides one from them — someone with the key is not going to knock. Between
+    them no scene ever offers more than the two buttons can answer.
+    """
     return [
         choice
         for choice in scene["choices"]
-        if "requires" not in choice or player.has(choice["requires"])
+        if ("requires" not in choice or player.has(choice["requires"]))
+        and ("unless" not in choice or not player.has(choice["unless"]))
     ]
 
 

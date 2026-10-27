@@ -86,7 +86,10 @@ class GpioButtons:
     Pi 5 needs gpiozero, because RPi.GPIO does not work on it.
     """
 
-    PINS = (17, 27, 22)  # provisional, until the buttons are chosen
+    # Two buttons, because two is what there are. The chapter is built so that
+    # no scene ever offers a third: see available_choices in pocketquest.py.
+    # GPIO 17 is header pin 11, GPIO 27 is pin 13.
+    PINS = (17, 27)
 
     def __init__(self):
         from gpiozero import Button

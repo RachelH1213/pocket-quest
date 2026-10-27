@@ -66,7 +66,17 @@ Milestones 1-5 contain no model calls at all.
 | Raspberry Pi 5, 4GB | CanaKit bundle: board, case, active cooler, 45W USB-C PSU, 32GB microSD | On hand |
 | Thermal printer | Symcode 58mm USB, MJ-5890K | **Working** — prints from a laptop over USB, 2026-10-06 |
 | Thermal paper | MUNBYN 2 1/4" x 50ft, 10 rolls | Ordered |
-| Buttons | MakerSpot 6mm tactile, pre-wired with female Dupont ends | **Not ordered yet** |
+| Buttons | 2 x EG STARTS 100mm LED dome, already owned | On hand |
+| Button wiring | Twidec 4.8mm female spade leads, already owned | On hand |
+
+The buttons were left over from an earlier project, so nothing had to be bought.
+Their 12V LEDs cannot be driven from the Pi, which has 5V and 3.3V, and do not
+need to be: the lamp and the microswitch are separate circuits and only the
+switch matters. The spade leads end in bare wire, which goes into a female
+Dupont jumper to reach the header.
+
+100mm is large — three side by side would be 30cm — which the enclosure will
+have to answer for in November.
 
 ## Running on the Pi
 
@@ -369,8 +379,8 @@ rate is not yet a feature. See the open question below.
 
 ## Open questions
 
-- [ ] Which buttons, and how many? 2-3 is the design target. Milestone 2 cannot
-      start without them.
+- [ ] Is a third button worth buying later? Two is settled for now, and the
+      chapter is built so that no scene ever needs a third.
 - [ ] How does the Pi reach Ollama on the node? SSH tunnel, Tailscale, or
       something else. Development uses a tunnel from the laptop.
 - [ ] **How does a player enter an item code with only three buttons?** The
