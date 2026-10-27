@@ -275,7 +275,10 @@ def tell(scene, player, choices, note):
     import narrator
 
     situation = {
-        "location": scene["title"].replace("\n", ", ").lower(),
+        # The author's own lines are what the room contains. Handing the model
+        # only the title left it describing a door it had already walked
+        # through and inventing a keypad that exists nowhere.
+        "here": " ".join(line for line in scene["text"] if line),
         "hp": player.hp,
         "inventory": [ITEMS[i]["name"] for i in player.inventory],
         "allowed_next": [c["goto"] for c in choices],

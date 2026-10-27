@@ -36,16 +36,20 @@ running. The machines print. It is never clear whether the player is reading
 the machine or the machine is writing the player. Flat, plain sentences. No
 fantasy, no exclamation marks, no addressing the reader as "adventurer".
 
+WHAT IS HERE
+{here}
+
 THE SITUATION
-location: {location}
 hp: {hp}
 inventory: {inventory}
 you may grant an item: {items_allowed}
 
 RULES
+- Retell the moment above in your own words. Everything in this room is listed
+  under WHAT IS HERE. Do not add an object that is not in it.
 - SCENE is at most 4 lines, each at most 28 characters. Count them.
 - The two choices are things the player does, written as commands, at most 20
-  characters.
+  characters, and each must act on something listed above.
 - HP_CHANGE is exactly -1, 0 or 1.
 - ITEM_ADD is none unless granting an item is allowed above.
 
@@ -65,10 +69,10 @@ class NarratorError(RuntimeError):
 
 
 def build_prompt(state):
-    """Note what is absent: the map. The model is told where the player is, not
-    where they may go."""
+    """Note what is absent: the map. The model is told what is in the room it is
+    describing, not where the exits lead."""
     return PROMPT.format(
-        location=state["location"],
+        here=state["here"],
         hp=state["hp"],
         inventory=", ".join(state["inventory"]) or "empty",
         items_allowed=", ".join(state.get("items_allowed", [])) or "no",

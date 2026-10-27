@@ -305,15 +305,19 @@ What the model may change is the prose, the two choice labels, HP by one, and
 an item where the scene allows one. What it may never change is where those
 choices lead. The labels are painted onto the program's own routing.
 
-**A limitation worth knowing.** The harness checks form, not fiction. A scene it
-accepted read "The door hums low. You stand in shadows." with a choice to
-"Check the keypad" — there is no keypad anywhere in this world, and the player
-had just walked through that door into a corridor of machines. Nothing in the
-harness can catch that, because nothing in it knows what the room contains. The
-cause is thin grounding: the model is handed the scene's title as its
-`location`, which for `corridor_01` is "behind the door" and says nothing about
-machines or paper. Giving it the author's own scene text as context is the
-obvious next thing to try.
+**Grounding, fixed 2026-10-27.** The model used to be handed the scene's title
+and nothing else, so for `corridor_01` it knew only "behind the door" and
+described a door the player had already walked through, offering to check a
+keypad that exists nowhere in this world. It is now handed the author's own
+lines as WHAT IS HERE, and told not to add an object that is not in them. Five
+runs afterwards: every one about the corridor, the machines, the page and the
+key, every choice acting on something real. The invention stopped.
+
+**What it still gets wrong is typography.** Of seven rejections across those
+runs, six were line width — 33, 34, 35 characters against a paper that fits 32,
+and twice the whole scene on a single line of 75 and 141. Asking a model to
+count characters does not work, and "Count them" in the prompt does not make it
+work. The open question below is whether counting was ever its job.
 
 ## What the harness caught
 
@@ -342,6 +346,13 @@ rate is not yet a feature. See the open question below.
 
 - [ ] Which buttons, and how many? 2-3 is the design target. Milestone 2 cannot
       start without them.
+- [ ] **Should the model be writing lines at all, or sentences?** Line width is
+      now almost the whole rejection rate. The model is being asked to typeset,
+      which it is bad at, while `receipts.py` already owns how text meets the
+      paper. Asking for prose and wrapping it in the program would move the job
+      to the side that can do it. The harness refuses to repair a model's
+      decisions, but wrapping is presentation rather than a decision — the
+      author should say whether that line holds.
 - [ ] How does the Pi reach Ollama on the node? SSH tunnel, Tailscale, or
       something else. Development uses a tunnel from the laptop.
 - [ ] **How does a player enter an item code with only three buttons?** The
