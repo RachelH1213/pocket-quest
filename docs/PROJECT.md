@@ -282,6 +282,39 @@ narrator does not change the game state; letting it choose the next room was
 letting it do exactly that, with the harness catching it afterwards instead of
 the design preventing it.
 
+## The narrator inside the game
+
+A scene opens itself to the model by carrying `narrate: True`. It still carries
+the author's own text and choices, because that is what prints when the model
+is unreachable or when nothing it sends survives three attempts. A scene that
+can be narrated is the author's scene plus permission to try, which makes "the
+game works without AI" a thing the code cannot do otherwise.
+
+The narrator is off unless asked for:
+
+```
+POCKETQUEST_NARRATOR=on python3 pocketquest.py
+```
+
+Off, the game answers instantly and is exactly the written chapter. On, a
+narrated scene costs about 12 seconds, or nothing at all when the model cannot
+be reached — a refused connection fails immediately rather than waiting out the
+timeout.
+
+What the model may change is the prose, the two choice labels, HP by one, and
+an item where the scene allows one. What it may never change is where those
+choices lead. The labels are painted onto the program's own routing.
+
+**A limitation worth knowing.** The harness checks form, not fiction. A scene it
+accepted read "The door hums low. You stand in shadows." with a choice to
+"Check the keypad" — there is no keypad anywhere in this world, and the player
+had just walked through that door into a corridor of machines. Nothing in the
+harness can catch that, because nothing in it knows what the room contains. The
+cause is thin grounding: the model is handed the scene's title as its
+`location`, which for `corridor_01` is "behind the door" and says nothing about
+machines or paper. Giving it the author's own scene text as context is the
+obvious next thing to try.
+
 ## What the harness caught
 
 Twelve kinds of bad reply were fed to it by hand — an invented item, a real item

@@ -126,12 +126,14 @@ def parse(reply):
     return found
 
 
-def narrate(state, next_state):
+def narrate(state, next_state=None):
     """One scene, as the model wrote it. Nothing here has been checked yet.
 
-    `next_state` is the program's routing decision, attached after the fact so
-    the harness can check it like any other field. The model had no part in it.
+    Routing is the program's and happens after the player chooses, so there is
+    usually no destination to attach. `next_state` exists for callers that do
+    decide up front and want the harness to check their own value too.
     """
     reply = parse(ask_model(build_prompt(state)))
-    reply["NEXT_STATE"] = next_state
+    if next_state is not None:
+        reply["NEXT_STATE"] = next_state
     return reply

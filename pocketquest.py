@@ -11,8 +11,16 @@ the machine that should not be running, the red light, the glass key, the glass
 door — and it is the author's to rewrite.
 """
 
+import os
+
 import hardware
 import receipts
+
+# The narrator is opt-in. Off, the game is exactly the chapter as written and
+# answers instantly; on, scenes marked `narrate` are offered to the model first.
+#     POCKETQUEST_NARRATOR=on python3 pocketquest.py
+NARRATOR_ON = os.environ.get("POCKETQUEST_NARRATOR") == "on"
+NARRATOR_ATTEMPTS = 3
 
 # ---------------------------------------------------------------- the world
 
@@ -109,6 +117,7 @@ SCENES = {
     },
     "corridor_01": {
         "title": "BEHIND THE DOOR",
+        "narrate": True,  # the model may tell this one; the lines below are the fallback
         "text": [
             "A corridor of machines,",
             "all of them printing.",
@@ -250,6 +259,45 @@ class Player:
 # ---------------------------------------------------------------- the game
 
 
+def tell(scene, player, choices, note):
+    """The prose and the choice labels for this scene.
+
+    The author's, unless this scene is open to the narrator, the narrator is
+    switched on, and what it sent survived the harness. A scene that is offered
+    to the model still carries the author's version, so there is always
+    something to print.
+    """
+    author = (scene["text"], [c["label"] for c in choices], 0, None)
+    if not (NARRATOR_ON and scene.get("narrate") and len(choices) == 2):
+        return author
+
+    import harness
+    import narrator
+
+    situation = {
+        "location": scene["title"].replace("\n", ", ").lower(),
+        "hp": player.hp,
+        "inventory": [ITEMS[i]["name"] for i in player.inventory],
+        "allowed_next": [c["goto"] for c in choices],
+        "items_allowed": [],
+    }
+    try:
+        reply = harness.validated(
+            situation, list(SCENES), list(ITEMS), narrator.narrate,
+            attempts=NARRATOR_ATTEMPTS, log=note,
+        )
+    except (harness.HarnessFailure, narrator.NarratorError) as refused:
+        note(f"falling back to the written scene — {refused}")
+        return author
+
+    return (
+        reply["SCENE"],
+        [reply["CHOICE_A"], reply["CHOICE_B"]],
+        int(reply["HP_CHANGE"]),
+        None if reply["ITEM_ADD"].lower() == "none" else reply["ITEM_ADD"],
+    )
+
+
 def available_choices(scene, player):
     """Choices the player can actually take right now."""
     return [
@@ -259,7 +307,7 @@ def available_choices(scene, player):
     ]
 
 
-def play():
+def play(note=lambda message: None):
     printer, buttons = hardware.get_hardware()
     player = Player()
     scene_id = START
@@ -281,24 +329,33 @@ def play():
         if scene.get("ending"):
             printer.print_lines(receipts.ending(scene, player))
         else:
-            printer.print_lines(receipts.story(scene, player, choices))
+            text, labels, hp_change, granted = tell(scene, player, choices, note)
+            # Whatever the narrator was allowed to change, it has already been
+            # through the harness; the routing underneath these labels is still
+            # the program's.
+            player.hp = max(0, player.hp + hp_change)
+            if granted and not player.has(granted):
+                player.inventory.append(granted)
+                picked_up = granted
+            spoken = dict(scene, text=text)
+            shown = [dict(c, label=l) for c, l in zip(choices, labels)]
+            printer.print_lines(receipts.story(spoken, player, shown))
 
-        # The item is a second piece of paper. That piece of paper is the object.
         if picked_up:
             printer.print_lines(
                 receipts.item(ITEMS[picked_up], len(player.inventory))
             )
 
-        if run_is_over:
+        if run_is_over or player.hp <= 0:
             if player.hp <= 0:
                 printer.print_lines(
                     [receipts.rule(), receipts.centre("GAME OVER"), receipts.rule()]
                 )
             return
 
-        picked = buttons.wait_for_choice([c["label"] for c in choices])
+        picked = buttons.wait_for_choice(labels)
         scene_id = choices[picked]["goto"]
 
 
 if __name__ == "__main__":
-    play()
+    play(note=lambda message: print(f"  [narrator] {message}"))

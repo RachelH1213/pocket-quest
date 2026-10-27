@@ -58,9 +58,13 @@ def check(reply, state, known_states, known_items):
         elif item not in state.get("items_allowed", []):
             problems.append(f"ITEM_ADD is {item!r}, which this scene was not allowed to grant")
 
-    nxt = reply.get("NEXT_STATE", "")
-    if nxt not in state["allowed_next"]:
-        problems.append(f"NEXT_STATE is {nxt!r}, which is not one of {state['allowed_next']}")
+    # Routing belongs to the program now, so most replies carry no destination
+    # at all. When a caller does decide one up front, it gets checked like
+    # anything else — against programmer error rather than model misbehaviour.
+    if "NEXT_STATE" in reply:
+        nxt = reply["NEXT_STATE"]
+        if nxt not in state["allowed_next"]:
+            problems.append(f"NEXT_STATE is {nxt!r}, which is not one of {state['allowed_next']}")
 
     length = sum(len(line) + 1 for line in scene) + len(reply.get("CHOICE_A", "")) + len(reply.get("CHOICE_B", ""))
     if length > MAX_RECEIPT:
